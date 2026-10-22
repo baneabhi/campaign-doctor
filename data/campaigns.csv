@@ -1,0 +1,7 @@
+campaign_id,name,budget_usd,start_date,end_date,max_bid_cpm,freq_cap_per_day,audience_size
+C101,Northwind Outdoors - Prospecting,31000,2026-10-01,2026-10-31,6.5,3,4200000
+C102,Contoso Insurance - Retargeting,12400,2026-10-01,2026-10-31,9.0,2,180000
+C103,Fabrikam Mobile - App Install,21700,2026-10-01,2026-10-31,2.0,3,5600000
+C104,Litware Travel - Autumn Sale,15500,2026-10-01,2026-10-31,7.5,4,2900000
+C105,Adatum Bank - Brand Awareness,62000,2026-10-01,2026-10-31,9.5,3,8300000
+C106,Tailspin Gaming - Video Launch,24800,2026-10-01,2026-10-31,12.0,3,3100000
