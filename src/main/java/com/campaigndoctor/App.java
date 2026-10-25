@@ -66,8 +66,9 @@ public final class App {
             try {
                 AgentResult r = agent.ask(line);
                 System.out.println("\n" + r.text());
-                System.out.printf("%n[sources: %s | tools: %s | tokens: %d in / %d out | %d ms]%n",
-                        r.citations(), r.toolsCalled(), r.inputTokens(), r.outputTokens(), r.latencyMs());
+                System.out.printf("%n[cited: %s | retrieved: %s | tools: %s | tokens: %d in / %d out | %d ms]%n",
+                                    r.citations(), r.retrievedSources(), r.toolsCalled(),
+                                    r.inputTokens(), r.outputTokens(), r.latencyMs());            
             } catch (UnsupportedOperationException e) {
                 System.out.println("Not implemented yet: " + e.getMessage());
             } catch (LlmException e) {
