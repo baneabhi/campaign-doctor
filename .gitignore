@@ -1,5 +1,7 @@
 target/
+eval/results/
 .env
+.vscode
 .idea/
 *.iml
 .classpath
