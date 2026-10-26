@@ -7,7 +7,9 @@ import com.campaigndoctor.eval.EvalCaseLoader;
 import com.campaigndoctor.eval.EvalReport;
 import com.campaigndoctor.eval.EvalRunner;
 import com.campaigndoctor.llm.AnthropicClient;
+import com.campaigndoctor.llm.LlmClient;
 import com.campaigndoctor.llm.LlmException;
+import com.campaigndoctor.llm.SdkAnthropicClient;
 import com.campaigndoctor.rag.Bm25Retriever;
 import com.campaigndoctor.rag.DocLoader;
 import com.campaigndoctor.tools.CampaignRepository;
@@ -29,20 +31,27 @@ public final class App {
     public static void main(String[] args) throws IOException {
         String mode = args.length > 0 ? args[0] : "chat";
         Path home = Path.of(System.getenv().getOrDefault("CAMPAIGN_DOCTOR_HOME", "."));
-        Agent agent = buildAgent(home);
 
-        switch (mode) {
-            case "chat" -> chat(agent);
-            case "eval" -> eval(agent, home.resolve(args.length > 1 ? args[1] : "eval/cases.json"));
-            default -> System.err.println("Usage: App [chat | eval [cases.json]]");
+        try (LlmClient llm = createClient()) {
+            Agent agent = buildAgent(home, llm);
+            switch (mode) {
+                case "chat" -> chat(agent);
+                case "eval" -> eval(agent, home.resolve(args.length > 1 ? args[1] : "eval/cases.json"));
+                default -> System.err.println("Usage: App [chat | eval [cases.json]]");
+            }
         }
     }
 
-    private static Agent buildAgent(Path home) throws IOException {
+    private static LlmClient createClient() {
+        return "sdk".equals(System.getenv("LLM_CLIENT"))
+                ? SdkAnthropicClient.fromEnv()
+                : AnthropicClient.fromEnv();
+    }
+
+    private static Agent buildAgent(Path home, LlmClient llm) throws IOException {
         var chunks = DocLoader.loadDir(home.resolve("data/docs"));
         var repo = CampaignRepository.load(home.resolve("data"));
-        return new Agent(AnthropicClient.fromEnv(), new Bm25Retriever(chunks), new ToolRegistry(repo),
-                AgentConfig.defaults());
+        return new Agent(llm, new Bm25Retriever(chunks), new ToolRegistry(repo), AgentConfig.defaults());
     }
 
     private static void chat(Agent agent) throws IOException {
