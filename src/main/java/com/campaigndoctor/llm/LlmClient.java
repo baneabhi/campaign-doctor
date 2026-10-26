@@ -3,7 +3,10 @@ package com.campaigndoctor.llm;
 import java.util.List;
 
 /** The one seam between our code and a model provider. Tests plug in a fake; production uses {@link AnthropicClient}. */
-public interface LlmClient {
+public interface LlmClient extends AutoCloseable {
 
     LlmResponse send(String system, List<Message> messages, List<ToolDef> tools);
+
+    @Override
+    default void close() {}
 }
