@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
 
 # Cancel superseded runs on the same branch/PR
 concurrency:
@@ -27,6 +26,7 @@ jobs:
           cache: maven
 
       # Unit tests only. They use FakeLlmClient, so no API key and no cost.
+      # The live eval is run locally, never in CI.
       - name: Build and test
         run: mvn -B -ntp verify
 
@@ -36,28 +36,3 @@ jobs:
         with:
           name: surefire-reports
           path: target/surefire-reports/
-
-  # Live eval against the real model. Costs money and is non-deterministic,
-  # so it only runs when you start it by hand from the Actions tab.
-  eval:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: maven
-
-      - name: Run eval
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          LLM_CLIENT: sdk
-        run: mvn -B -ntp -q compile exec:java -Dexec.args=eval | tee eval-result.txt
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: eval-result
-          path: eval-result.txt
