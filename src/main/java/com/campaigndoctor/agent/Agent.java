@@ -5,11 +5,13 @@ import com.campaigndoctor.llm.Block.ToolResult;
 import com.campaigndoctor.llm.LlmClient;
 import com.campaigndoctor.llm.Message;
 import com.campaigndoctor.llm.Usage;
+import com.campaigndoctor.rag.Hit;
 import com.campaigndoctor.rag.Retriever;
 import com.campaigndoctor.tools.ToolRegistry;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * YOUR TASK #3: the agent loop. Tests: AgentTest (it uses a fake LlmClient, so you need no API key to get green).
@@ -44,6 +46,7 @@ public final class Agent implements Assistant {
     private final ToolRegistry tools;
     private final AgentConfig config;
     private final List<Message> history = new ArrayList<>();
+    private record Prepared(String system, List<String> sources) {}
 
     public Agent(LlmClient llm, Retriever retriever, ToolRegistry tools, AgentConfig config) {
         this.llm = llm;
@@ -55,16 +58,17 @@ public final class Agent implements Assistant {
     @Override
     public AgentResult ask(String question) {
         long start = System.nanoTime();
-        var hits = retriever.search(question, config.topK());
-        var systemPrompt = Prompts.system(hits);
+        var prepared = prepare(question);
         history.add(Message.user(question));
         int numberOfCalls = 1;
         String finalResponse = null;
         Usage total = Usage.ZERO;
         List<String> toolsCalled = new ArrayList<>();
+        Set<String> retrieved = new LinkedHashSet<>(prepared.sources());
+
         while (numberOfCalls <= config.maxLlmCalls()) {
-            var response = llm.send(systemPrompt, history, tools.definitions());
-            System.err.println(response.stopReason() + " " + response.content());
+            var response = llm.send(prepared.system(), history, tools.definitions());
+            // System.err.println(response.stopReason() + " " + response.content());
             total = total.plus(response.usage());
             history.add(Message.assistant(response.content()));
             if (response.toolUses().isEmpty()) {
@@ -74,6 +78,10 @@ public final class Agent implements Assistant {
             List<Block.ToolResult> toolResults = new ArrayList<>();
             response.toolUses().forEach(tool -> { 
                 var toolOutput = tools.execute(tool.name(), tool.input());
+                if (tool.name().equals(ToolRegistry.SEARCH_DOCS) && !toolOutput.isError()) {
+                    var citations = Citations.extract(toolOutput.content());
+                    retrieved.addAll(citations);
+                }
                 toolResults.add(new ToolResult(tool.id(), toolOutput.content(), toolOutput.isError()));
                 toolsCalled.add(tool.name());
             });
@@ -84,14 +92,21 @@ public final class Agent implements Assistant {
             finalResponse = Prompts.TOOL_LIMIT_MESSAGE;
             history.add(Message.assistant(List.of(new Block.Text(finalResponse))));
         }
-        long end = System.nanoTime();
-        List<String> sources = new ArrayList<>(
-        new LinkedHashSet<>(hits.stream().map(h -> h.chunk().source()).toList()));
-        return new AgentResult(finalResponse, Citations.extract(finalResponse), toolsCalled, sources, total.inputTokens(), total.outputTokens(), (end - start)/1000000);
+        long end = System.nanoTime();        
+        return new AgentResult(finalResponse, Citations.extract(finalResponse), toolsCalled, new ArrayList<>(retrieved), total.inputTokens(), total.outputTokens(), (end - start)/1000000);
     }
 
     @Override
     public void reset() {
         history.clear();
+    }
+
+    private Prepared prepare(String question) {
+        if (config.agenticRag()) {
+            return new Prepared(Prompts.systemAgentic(), List.of());
+        }
+        List<Hit> hits = retriever.search(question, config.topK());
+        List<String> sources = hits.stream().map(h -> h.chunk().source()).distinct().toList();
+        return new Prepared(Prompts.system(hits), sources);
     }
 }
