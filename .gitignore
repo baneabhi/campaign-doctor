@@ -1,7 +1,8 @@
 target/
-eval/results/
+eval/results/scratch/
 .env
 .vscode
+.DS_Store
 .idea/
 *.iml
 .classpath

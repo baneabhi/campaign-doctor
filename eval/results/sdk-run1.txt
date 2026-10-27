@@ -1,0 +1,17 @@
+PASS  c103-pacing-value              3826 tok   14796 ms
+PASS  c105-effective-cpm             3883 tok    5932 ms
+PASS  c102-audience-size             3573 tok    4168 ms
+PASS  list-under-pacing              8391 tok   10036 ms
+PASS  highest-win-rate               7713 tok    7985 ms
+PASS  c104-over-pacing               5344 tok    9354 ms
+FAIL  c103-why-underdelivering       5197 tok    9781 ms
+        - missing citation: troubleshooting-underdelivery.md
+PASS  c106-delivery-cliff            5461 tok    6973 ms
+PASS  c102-reach-limited             4994 tok   10510 ms
+PASS  define-pacing-ratio            1834 tok    2837 ms
+PASS  define-win-rate                1944 tok    2927 ms
+PASS  abstain-off-topic              1189 tok    2143 ms
+PASS  abstain-unknown-campaign       5358 tok    4438 ms
+
+Passed 12/13 (92.3%) | tokens in/out: 50744 / 7963 | avg latency: 7068 ms
+

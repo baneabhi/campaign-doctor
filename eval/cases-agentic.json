@@ -1,0 +1,85 @@
+[
+  {
+    "id": "c103-pacing-value",
+    "question": "What is the pacing ratio for campaign C103?",
+    "expectContains": ["0.62|62%"],
+    "expectTools": ["get_campaign_summary"]
+  },
+  {
+    "id": "c105-effective-cpm",
+    "question": "What is the effective CPM for C105?",
+    "expectContains": ["8.06"],
+    "expectTools": ["get_campaign_summary"]
+  },
+  {
+    "id": "c102-audience-size",
+    "question": "How big is the audience for C102?",
+    "expectContains": ["180000|180k|0.18 million"],
+    "expectTools": ["get_campaign_summary"]
+  },
+  {
+    "id": "list-under-pacing",
+    "question": "Which campaigns are under-pacing right now?",
+    "expectContains": ["C102", "C103", "C106"],
+    "expectTools": ["list_campaigns", "get_campaign_summary"]
+  },
+  {
+    "id": "highest-win-rate",
+    "question": "Which campaign has the highest win rate?",
+    "expectContains": ["C102"],
+    "expectTools": ["list_campaigns", "get_campaign_summary"]
+  },
+  {
+    "id": "c104-over-pacing",
+    "question": "Is C104 over-pacing, and what should I do about it?",
+    "expectContains": ["1.30|130%|over-pacing|over pacing"],
+    "expectSources": ["pacing.md"],
+    "expectTools": ["search_docs", "get_campaign_summary"]
+  },
+  {
+    "id": "c103-why-underdelivering",
+    "question": "Why is C103 under-delivering?",
+    "expectContains": ["win rate|win-rate", "bid"],
+    "expectSources": ["troubleshooting-underdelivery.md"],
+    "expectTools": ["search_docs", "get_campaign_summary"]
+  },
+  {
+    "id": "c106-delivery-cliff",
+    "question": "When did delivery drop for C106 and what is the likely cause?",
+    "expectContains": ["2026-10-15|oct 15|october 15|15 oct|15th"],
+    "expectSources": ["creative-and-supply.md"],
+    "expectTools": ["search_docs", "get_daily_metrics"]
+  },
+  {
+    "id": "c102-reach-limited",
+    "question": "C102 wins most of its auctions but still isn't spending. Why?",
+    "expectContains": ["audience|reach"],
+    "expectSources": ["audience-and-frequency.md"],
+    "expectTools": ["search_docs", "get_campaign_summary"]
+  },
+  {
+    "id": "define-pacing-ratio",
+    "question": "How is the pacing ratio calculated?",
+    "expectContains": ["expected"],
+    "expectSources": ["pacing.md"],
+    "expectTools": ["search_docs"]
+  },
+  {
+    "id": "define-win-rate",
+    "question": "What does win rate mean and when is a high one a problem?",
+    "expectContains": ["wins", "bids"],
+    "expectSources": ["bidding-and-win-rate.md"],
+    "expectTools": ["search_docs"]
+  },
+  {
+    "id": "abstain-off-topic",
+    "question": "What is the weather in Sydney tomorrow?",
+    "expectAbstain": true
+  },
+  {
+    "id": "abstain-unknown-campaign",
+    "question": "What is the pacing ratio for campaign C999?",
+    "expectAbstain": true,
+    "expectTools": ["get_campaign_summary"]
+  }
+]

@@ -51,6 +51,9 @@ public final class App {
     private static Agent buildAgent(Path home, LlmClient llm) throws IOException {
         var chunks = DocLoader.loadDir(home.resolve("data/docs"));
         var repo = CampaignRepository.load(home.resolve("data"));
+        if ("agentic".equals(System.getenv("RAG_MODE"))) {
+            return new Agent(llm, null, new ToolRegistry(repo, new Bm25Retriever(chunks)), AgentConfig.agentic());
+        }
         return new Agent(llm, new Bm25Retriever(chunks), new ToolRegistry(repo), AgentConfig.defaults());
     }
 
